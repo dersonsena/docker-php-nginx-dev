@@ -10,7 +10,6 @@ ENV PHP_POST_MAX_SIZE=50M
 ENV PHP_UPLOAD_MAX_FILESIZE=50M
 
 # XDebug Env Variables
-ENV XDEBUG_VERSION=3.0.2
 ENV XDEBUG_MODE=debug
 ENV XDEBUG_START_WITH_REQUEST=default
 ENV XDEBUG_DISCOVER_CLIENT_HOST=true
@@ -19,15 +18,16 @@ ENV XDEBUG_CLIENT_PORT=9000
 ENV XDEBUG_MAX_NESTING_LEVEL=1500
 ENV XDEBUG_IDE_KEY=PHPSTORM
 
-# MongoDB Env Variables
+# Versioning Env Vars
+ENV XDEBUG_VERSION=3.0.2
 ENV MONGODB_VERSION=1.5.2
-
-# Composer Env Variables
 ENV COMPOSER_VERSION=2.0.9
+ENV NGINX_VERSION=1.18.0-r13
+ENV GIT_VERSION=2.30.1-r0
 
 RUN apk update --no-cache && apk add \
     libzip-dev \
-    git \
+    git=${GIT_VERSION} \
     nano \
     g++ \
     gcc \
@@ -49,7 +49,7 @@ RUN apk update --no-cache && apk add \
     freetype-dev \
     libjpeg-turbo-dev \
     libpng-dev \
-    nginx \
+    nginx=${NGINX_VERSION} \
     imagemagick-dev \
     imagemagick \
     file \
@@ -102,33 +102,30 @@ RUN pecl install -o -f redis && docker-php-ext-enable redis
 # Installing XDebug
 RUN pecl install -o -f xdebug-${XDEBUG_VERSION} && docker-php-ext-enable xdebug
 
-ENV XDEBUG_INI_FILE=/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.mode=${XDEBUG_MODE}" >> ${XDEBUG_INI_FILE} \
-    && echo "xdebug.start_with_request = ${XDEBUG_START_WITH_REQUEST}" >> ${XDEBUG_INI_FILE} \ 
-    && echo "xdebug.xdebug.discover_client_host = ${XDEBUG_DISCOVER_CLIENT_HOST}" >> ${XDEBUG_INI_FILE} \
-    && echo "xdebug.client_host = ${XDEBUG_CLIENT_HOST}" >> ${XDEBUG_INI_FILE} \
-    && echo "xdebug.client_port = ${XDEBUG_CLIENT_PORT}" >> ${XDEBUG_INI_FILE} \
-    && echo "xdebug.idekey = ${XDEBUG_IDE_KEY}" >> ${XDEBUG_INI_FILE} \
-    && echo "xdebug.max_nesting_level = ${XDEBUG_MAX_NESTING_LEVEL}" >> ${XDEBUG_INI_FILE}
-
+# Making copy of php.ini development file
 RUN cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
-
-ENV PHP_INI_FILE=/usr/local/etc/php/php.ini
-RUN sed -i "s/memory_limit.*/memory_limit = $PHP_MEMORY_LIMIT/" ${PHP_INI_FILE} \
-    && sed -i "s/date.timezone.*/date.timezone = $PHP_DATE_TIMEZONE/" ${PHP_INI_FILE} \
-    && sed -i "s/display_errors = On.*/display_errors = $PHP_DISPLAY_ERRORS/" ${PHP_INI_FILE} \
-    && sed -i "s/max_execution_time.*/max_execution_time = $PHP_MAX_EXECUTION_TIME/" ${PHP_INI_FILE} \
-    && sed -i "s/post_max_size.*/post_max_size = $PHP_POST_MAX_SIZE/" ${PHP_INI_FILE} \
-    && sed -i "s/upload_max_filesize.*/upload_max_filesize = $PHP_UPLOAD_MAX_FILESIZE/" ${PHP_INI_FILE}
-
+    
 RUN rm -rf /var/cache/apk/*
  
 RUN curl -sS https://getcomposer.org/installer | php -- --version=${COMPOSER_VERSION} --install-dir=/usr/bin --filename=composer
 
 ## Setup of Nginx
-COPY ./nginx.conf /etc/nginx/
+RUN rm /etc/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./nginx/nginx.conf /etc/nginx/
+COPY ./nginx/default.conf /etc/nginx/conf.d/
 
-EXPOSE 80
-EXPOSE 443
+# Creating self-signed SSL Certificate to Nginx
+RUN mkdir /etc/nginx/certs && openssl req \
+    -subj "/C=US/ST=New York/L=Rochester/O=Localhost SA/OU=Development/CN=localhost/emailAddress=john@gmail.com" \
+    -new -newkey rsa:2048 -sha256 -days 1095 -nodes -x509 -keyout \
+    /etc/nginx/certs/certificate.key -out /etc/nginx/certs/certificate.crt
 
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 80 443
+
+WORKDIR /var/www/html
+RUN chown -R www-data:www-data /var/www/html
+
+COPY entrypoint.sh /etc/entrypoint.sh
+RUN chmod +x /etc/entrypoint.sh
+
+ENTRYPOINT ["/etc/entrypoint.sh"]
