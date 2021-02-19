@@ -13,12 +13,9 @@ ENV PHP_UPLOAD_MAX_FILESIZE=50M
 ENV XDEBUG_VERSION=3.0.2
 ENV XDEBUG_MODE=debug
 ENV XDEBUG_START_WITH_REQUEST=default
-ENV XDEBUG_REMOTE_AUTOSTART=1
-ENV XDEBUG_REMOTE_CONNECT_BACK=0
+ENV XDEBUG_DISCOVER_CLIENT_HOST=true
 ENV XDEBUG_CLIENT_HOST=host.docker.internal
 ENV XDEBUG_CLIENT_PORT=9000
-ENV XDEBUG_REMOTE_HOST=host.docker.internal
-ENV XDEBUG_REMOTE_PORT=9000
 ENV XDEBUG_MAX_NESTING_LEVEL=1500
 ENV XDEBUG_IDE_KEY=PHPSTORM
 
@@ -107,25 +104,22 @@ RUN pecl install -o -f xdebug-${XDEBUG_VERSION} && docker-php-ext-enable xdebug
 
 ENV XDEBUG_INI_FILE=/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo "xdebug.mode=${XDEBUG_MODE}" >> ${XDEBUG_INI_FILE} \
-    && echo "xdebug.start_with_request=${XDEBUG_START_WITH_REQUEST}" >> ${XDEBUG_INI_FILE} \ 
-    && echo "xdebug.remote_autostart=${XDEBUG_REMOTE_AUTOSTART}" >> ${XDEBUG_INI_FILE} \
-    && echo "xdebug.remote_connect_back=${XDEBUG_REMOTE_CONNECT_BACK}" >> ${XDEBUG_INI_FILE} \
-    && echo "xdebug.client_host=${XDEBUG_CLIENT_HOST}" >> ${XDEBUG_INI_FILE} \
-    && echo "xdebug.client_port=${XDEBUG_CLIENT_PORT}" >> ${XDEBUG_INI_FILE} \
-    && echo "xdebug.remote_host=${XDEBUG_REMOTE_HOST}" >> ${XDEBUG_INI_FILE} \
-    && echo "xdebug.remote_port=${XDEBUG_REMOTE_PORT}" >> ${XDEBUG_INI_FILE} \
-    && echo "xdebug.idekey=${XDEBUG_IDE_KEY}" >> ${XDEBUG_INI_FILE} \
-    && echo "xdebug.max_nesting_level=${XDEBUG_MAX_NESTING_LEVEL}" >> ${XDEBUG_INI_FILE}
+    && echo "xdebug.start_with_request = ${XDEBUG_START_WITH_REQUEST}" >> ${XDEBUG_INI_FILE} \ 
+    && echo "xdebug.xdebug.discover_client_host = ${XDEBUG_DISCOVER_CLIENT_HOST}" >> ${XDEBUG_INI_FILE} \
+    && echo "xdebug.client_host = ${XDEBUG_CLIENT_HOST}" >> ${XDEBUG_INI_FILE} \
+    && echo "xdebug.client_port = ${XDEBUG_CLIENT_PORT}" >> ${XDEBUG_INI_FILE} \
+    && echo "xdebug.idekey = ${XDEBUG_IDE_KEY}" >> ${XDEBUG_INI_FILE} \
+    && echo "xdebug.max_nesting_level = ${XDEBUG_MAX_NESTING_LEVEL}" >> ${XDEBUG_INI_FILE}
 
 RUN cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
 
 ENV PHP_INI_FILE=/usr/local/etc/php/php.ini
-RUN sed -i 's/memory_limit.*/memory_limit = ${PHP_MEMORY_LIMIT}/' ${PHP_INI_FILE} \
-    && sed -i 's/date.timezone.*/date.timezone = ${PHP_DATE_TIMEZONE}/' ${PHP_INI_FILE} \
-    && sed -i 's/display_errors = On.*/display_errors = ${PHP_DISPLAY_ERRORS}/' ${PHP_INI_FILE} \
-    && sed -i 's/max_execution_time.*/max_execution_time = ${PHP_MAX_EXECUTION_TIME}/' ${PHP_INI_FILE} \
-    && sed -i 's/post_max_size.*/post_max_size = ${PHP_POST_MAX_SIZE}/' ${PHP_INI_FILE} \
-    && sed -i 's/upload_max_filesize.*/upload_max_filesize = ${PHP_UPLOAD_MAX_FILESIZE}/' ${PHP_INI_FILE}
+RUN sed -i "s/memory_limit.*/memory_limit = $PHP_MEMORY_LIMIT/" ${PHP_INI_FILE} \
+    && sed -i "s/date.timezone.*/date.timezone = $PHP_DATE_TIMEZONE/" ${PHP_INI_FILE} \
+    && sed -i "s/display_errors = On.*/display_errors = $PHP_DISPLAY_ERRORS/" ${PHP_INI_FILE} \
+    && sed -i "s/max_execution_time.*/max_execution_time = $PHP_MAX_EXECUTION_TIME/" ${PHP_INI_FILE} \
+    && sed -i "s/post_max_size.*/post_max_size = $PHP_POST_MAX_SIZE/" ${PHP_INI_FILE} \
+    && sed -i "s/upload_max_filesize.*/upload_max_filesize = $PHP_UPLOAD_MAX_FILESIZE/" ${PHP_INI_FILE}
 
 RUN rm -rf /var/cache/apk/*
  
