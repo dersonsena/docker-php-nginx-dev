@@ -124,6 +124,7 @@ EXPOSE 80 443
 
 WORKDIR /var/www/html
 RUN chown -R www-data:www-data /var/www/html
+RUN chown -R www-data:www-data /var/lib/nginx
 
 COPY entrypoint.sh /etc/entrypoint.sh
 RUN chmod +x /etc/entrypoint.sh
