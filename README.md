@@ -12,6 +12,12 @@ Image composition and versions below:
 
 ### Minimal to use
 
+```bash
+docker run -d --name project-app -v "$PWD":/var/www/html -p 80:80 -p 443:443 dersonsena/php-nginx-dev
+```
+
+### Minimal to use with Docker Compose
+
 The snipet below show the **minimal setup**:
 
 ```yaml
