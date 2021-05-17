@@ -8,15 +8,14 @@ Image composition and versions below:
 - Composer 2.0.9
 - Git 2.30.1-r0
 
-## Docker Compose
-
-### Minimal to use
-
+## CLI
 ```bash
 docker run -d --name project-app -v "$PWD":/var/www/html -p 80:80 -p 443:443 dersonsena/php-nginx-dev
 ```
 
-### Minimal to use with Docker Compose
+## Docker Compose
+
+### Minimal to use
 
 The snipet below show the **minimal setup**:
 
