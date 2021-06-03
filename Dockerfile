@@ -1,4 +1,4 @@
-FROM php:7.4-fpm-alpine
+FROM php:7.4.11-fpm-alpine
 LABEL maintainer="Kilderson Sena <dersonsena@gmail.com>"
 
 # PHP Env Variables
