@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
 phpIniFile="/usr/local/etc/php/php.ini"
+nginxIniFile="/etc/nginx/conf.d/default.conf"
 xdebugIniFile="/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini"
+
+sed -i "s:root /var/www/html/public;*:root $NGINX_DOCUMENT_ROOT;:g" $nginxIniFile
 
 sed -i "s:;date.timezone.*:date.timezone =:g" $phpIniFile
 sed -i "s:memory_limit.*:memory_limit = $PHP_MEMORY_LIMIT:g" $phpIniFile
@@ -18,6 +21,7 @@ echo "xdebug.client_host = $XDEBUG_CLIENT_HOST" >> $xdebugIniFile
 echo "xdebug.client_port = $XDEBUG_CLIENT_PORT" >> $xdebugIniFile
 echo "xdebug.idekey = $XDEBUG_IDE_KEY" >> $xdebugIniFile
 echo "xdebug.max_nesting_level = $XDEBUG_MAX_NESTING_LEVEL" >> $xdebugIniFile
+echo "xdebug.log=$XDEBUG_LOG" >> $xdebugIniFile
 
 php-fpm -D -R;
 nginx -g "daemon off;"

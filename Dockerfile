@@ -1,5 +1,10 @@
-FROM php:7.4-fpm-alpine
+ARG PHP_VERSION=7.4.20
+FROM php:${PHP_VERSION}-fpm-alpine
 LABEL maintainer="Kilderson Sena <dersonsena@gmail.com>"
+
+ENV TERM="xterm"
+ENV LANG="C.UTF-8"
+ENV LC_ALL="C.UTF-8"
 
 # PHP Env Variables
 ENV PHP_DATE_TIMEZONE=America/Sao_Paulo
@@ -9,6 +14,9 @@ ENV PHP_MAX_EXECUTION_TIME=60
 ENV PHP_POST_MAX_SIZE=50M
 ENV PHP_UPLOAD_MAX_FILESIZE=50M
 
+# Nginx Env Variables
+ENV NGINX_DOCUMENT_ROOT=/var/www/html/public
+
 # XDebug Env Variables
 ENV XDEBUG_MODE=debug
 ENV XDEBUG_START_WITH_REQUEST=default
@@ -17,13 +25,15 @@ ENV XDEBUG_CLIENT_HOST=host.docker.internal
 ENV XDEBUG_CLIENT_PORT=9000
 ENV XDEBUG_MAX_NESTING_LEVEL=1500
 ENV XDEBUG_IDE_KEY=PHPSTORM
+ENV XDEBUG_LOG=/tmp/xdebug.log
 
 # Versioning Env Vars
 ENV XDEBUG_VERSION=3.0.2
 ENV MONGODB_VERSION=1.5.2
-ENV COMPOSER_VERSION=2.0.9
-ENV NGINX_VERSION=1.18.0-r13
-ENV GIT_VERSION=2.30.1-r0
+ENV REDIS_VERSION=5.3.4
+ENV COMPOSER_VERSION=2.1.3
+ENV NGINX_VERSION=1.18.0-r15
+ENV GIT_VERSION=2.30.2-r0
 
 RUN apk update --no-cache && apk add \
     libzip-dev \
@@ -97,7 +107,7 @@ RUN pecl install -o -f mcrypt && docker-php-ext-enable mcrypt
 RUN pecl install -o -f mongodb-${MONGODB_VERSION} && docker-php-ext-enable mongodb
 
 # Installing Redis extension
-RUN pecl install -o -f redis && docker-php-ext-enable redis
+RUN pecl install -o -f redis-${REDIS_VERSION} && docker-php-ext-enable redis
 
 # Installing XDebug
 RUN pecl install -o -f xdebug-${XDEBUG_VERSION} && docker-php-ext-enable xdebug
@@ -110,15 +120,14 @@ RUN rm -rf /var/cache/apk/*
 RUN curl -sS https://getcomposer.org/installer | php -- --version=${COMPOSER_VERSION} --install-dir=/usr/bin --filename=composer
 
 ## Setup of Nginx
-RUN rm /etc/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+RUN rm -f /etc/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 COPY ./nginx/nginx.conf /etc/nginx/
 COPY ./nginx/default.conf /etc/nginx/conf.d/
 
-# Creating self-signed SSL Certificate to Nginx
-RUN mkdir /etc/nginx/certs && openssl req \
-    -subj "/C=US/ST=New York/L=Rochester/O=Localhost SA/OU=Development/CN=localhost/emailAddress=john@gmail.com" \
-    -new -newkey rsa:2048 -sha256 -days 1095 -nodes -x509 -keyout \
-    /etc/nginx/certs/certificate.key -out /etc/nginx/certs/certificate.crt
+# Copying certificates into container
+RUN mkdir -p /etc/nginx/certs
+COPY ./nginx/certs/certificate.crt /etc/nginx/certs/
+COPY ./nginx/certs/certificate.key /etc/nginx/certs/
 
 EXPOSE 80 443
 

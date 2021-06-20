@@ -4,9 +4,11 @@ Image composition and versions below:
 
 - PHP FPM 7.4
 - XDebug 3.0.2
-- NGINX 1.18.0-r13
-- Composer 2.0.9
+- NGINX 1.18.0-r15
+- Composer 2.1.3
 - Git 2.30.1-r0
+- Redis 5.3.4
+- MongoDB 2.30.1-r0
 
 ## Docker Compose
 
@@ -65,7 +67,7 @@ networks:
     driver: bridge
 ```
 
-If you want use a custom `php.ini` file, just create one in your project, such as `.docker/php/php.ini`, and map volume like below:
+If you want to use a custom `php.ini` file, just create one in your project, such as `.docker/php/php.ini`, and map volume like below:
 
 ```yaml
 ...
@@ -77,9 +79,19 @@ volumes:
 
 > **TIP**: to make your life easier you can use the original php.ini file placed in root level of this repository.
 
+(BETA) You can change the PHP version (see [PHP Supported Versions](https://www.php.net/supported-versions.php)). Just set the arg `PHP_VERSION`. The default version is `7.4.20`:
+
+```yml
+...
+build:
+  args:
+    PHP_VERSION: 8.0.7
+...
+```
+
 ### XDebug
 
-You can custumize some xdebug params. The posibles variables and their default values are shown below:
+You can customize some xdebug params. The possibles variables and their default values are shown below:
 
 ```yaml
 version: '3.5'
@@ -100,6 +112,7 @@ services:
       - XDEBUG_CLIENT_PORT=9000
       - XDEBUG_MAX_NESTING_LEVEL=1500
       - XDEBUG_IDE_KEY=PHPSTORM
+      - XDEBUG_LOG=/tmp/xdebug.log
     networks:
       - project-network
 
@@ -119,9 +132,22 @@ environment:
 ...
 ```
 
-### SSL Certificate to NGINX
+### NGINX
 
-This docker image already have a SSL certificate, but if you want to use a custom SSL certificates to NGINX web server, just create thes files in folder in your project, such as `.docker/nginx/`:
+#### Change Document Root
+
+You can change the nginx document root. If the project's document is `public_html`, for example, you can do:
+
+```yaml
+...
+environment:
+  - NGINX_DOCUMENT_ROOT=/var/www/html/public_html
+...
+```
+
+#### SSL Certificate
+
+This docker image already have a SSL certificate, but if you want to use a custom SSL certificates to NGINX web server, just create the files in folder in your project, such as `.docker/nginx/`:
 
 - Private Key: `.docker/nginx/certificate.key`
 - Certificate: `.docker/nginx/certificate.crt`
@@ -136,7 +162,7 @@ services:
     image: dersonsena/php-nginx-dev
     volumes:
       - ./:/var/www/html
-      - ./docker/nginx:/etc/nginx/certs
+      - ./.docker/nginx/certs:/etc/nginx/certs
     ports:
       - '80:80'
       - '443:443'

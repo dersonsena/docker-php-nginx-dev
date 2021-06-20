@@ -1,0 +1,17 @@
+version: '3.5'
+services:
+  app:
+    container_name: dersonsena-app
+    image: dersonsena/php-nginx-dev
+    build:
+      context: './'
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - dersonsena-network
+    environment:
+      - NGINX_DOCUMENT_ROOT=/var/www/html/webroot
+
+networks:
+  dersonsena-network:
+    driver: bridge
