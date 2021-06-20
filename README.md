@@ -40,8 +40,6 @@ networks:
     driver: bridge
 ```
 
-> **IMPORTANT**: You must be a `/public` because this folder is the Nginx Document Root. If your project doesn't have it, you can create a symbolic link: `ln -fs ./your-document-root ./public`
-
 ### PHP
 
 You can custumize some php ini params. The posibles variables and their default values are shown below:
