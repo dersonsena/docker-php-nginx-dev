@@ -10,6 +10,11 @@ Image composition and versions below:
 - Redis 5.3.4
 - MongoDB 2.30.1-r0
 
+## CLI
+```bash
+docker run -d --name project-app -v "$PWD":/var/www/html -p 80:80 -p 443:443 dersonsena/php-nginx-dev
+```
+
 ## Docker Compose
 
 ### Minimal to use

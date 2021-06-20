@@ -7,8 +7,8 @@ xdebugIniFile="/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini"
 sed -i "s:root /var/www/html/public;*:root $NGINX_DOCUMENT_ROOT;:g" $nginxIniFile
 
 sed -i "s:;date.timezone.*:date.timezone =:g" $phpIniFile
-sed -i "s:memory_limit.*:memory_limit = $PHP_MEMORY_LIMIT:g" $phpIniFile
 sed -i "s:date.timezone.*:date.timezone = $PHP_DATE_TIMEZONE:g" $phpIniFile
+sed -i "s:memory_limit.*:memory_limit = $PHP_MEMORY_LIMIT:g" $phpIniFile
 sed -i "s:display_errors = On.*:display_errors = $PHP_DISPLAY_ERRORS:g" $phpIniFile
 sed -i "s:max_execution_time.*:max_execution_time = $PHP_MAX_EXECUTION_TIME:g" $phpIniFile
 sed -i "s:post_max_size.*:post_max_size = $PHP_POST_MAX_SIZE:g" $phpIniFile
