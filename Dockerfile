@@ -18,7 +18,7 @@ ENV PHP_UPLOAD_MAX_FILESIZE=50M
 ENV NGINX_DOCUMENT_ROOT=/var/www/html/public
 
 # XDebug Env Variables
-ENV XDEBUG_MODE=debug
+ENV XDEBUG_MODE=develop,debug,coverage
 ENV XDEBUG_START_WITH_REQUEST=default
 ENV XDEBUG_DISCOVER_CLIENT_HOST=true
 ENV XDEBUG_CLIENT_HOST=host.docker.internal

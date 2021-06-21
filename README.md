@@ -7,8 +7,8 @@ Image composition and versions below:
 - NGINX 1.18.0-r15
 - Composer 2.1.3
 - Git 2.30.1-r0
-- Redis 5.3.4
-- MongoDB 2.30.1-r0
+- Redis PHP Extension 5.3.4
+- MongoDB PHP Extension 2.30.1-r0
 
 ## CLI
 ```bash
@@ -108,9 +108,9 @@ services:
       - '80:80'
       - '443:443'
     environment:
-      - XDEBUG_MODE=debug
+      - XDEBUG_MODE=develop,debug,coverage
       - XDEBUG_START_WITH_REQUEST=yes
-      - XDEBUG_DISCOVER_CLIENT_HOST=false
+      - XDEBUG_DISCOVER_CLIENT_HOST=true
       - XDEBUG_CLIENT_HOST=host.docker.internal
       - XDEBUG_CLIENT_PORT=9000
       - XDEBUG_MAX_NESTING_LEVEL=1500

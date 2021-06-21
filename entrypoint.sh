@@ -15,6 +15,7 @@ sed -i "s:post_max_size.*:post_max_size = $PHP_POST_MAX_SIZE:g" $phpIniFile
 sed -i "s:upload_max_filesize.*:upload_max_filesize = $PHP_UPLOAD_MAX_FILESIZE:g" $phpIniFile
 
 echo "xdebug.mode=$XDEBUG_MODE" >> $xdebugIniFile
+echo "xdebug.cli_color=1" >> $xdebugIniFile
 echo "xdebug.start_with_request = $XDEBUG_START_WITH_REQUEST" >> $xdebugIniFile
 echo "xdebug.xdebug.discover_client_host = $XDEBUG_DISCOVER_CLIENT_HOST" >> $xdebugIniFile
 echo "xdebug.client_host = $XDEBUG_CLIENT_HOST" >> $xdebugIniFile
