@@ -29,7 +29,7 @@ ENV XDEBUG_LOG=/tmp/xdebug.log
 
 # Versioning Env Vars
 ENV XDEBUG_VERSION=3.0.2
-ENV MONGODB_VERSION=1.5.2
+ENV MONGODB_VERSION=1.10.0alpha1
 ENV REDIS_VERSION=5.3.4
 ENV COMPOSER_VERSION=2.1.3
 ENV NGINX_VERSION=1.20.1-r3
@@ -111,7 +111,9 @@ RUN pecl install -o -f yaml && docker-php-ext-enable yaml
 RUN pecl install -o -f mcrypt && docker-php-ext-enable mcrypt
 
 # Installing Mongodb extension
-RUN pecl install -o -f mongodb-${MONGODB_VERSION} && docker-php-ext-enable mongodb
+RUN mkdir -p /usr/src/php/ext/mongodb \
+    && curl -fsSL https://pecl.php.net/get/mongodb-${MONGODB_VERSION} | tar xvz -C "/usr/src/php/ext/mongodb" --strip 1 \
+    && docker-php-ext-install mongodb
 
 # Installing Redis extension
 RUN pecl install -o -f redis-${REDIS_VERSION} && docker-php-ext-enable redis

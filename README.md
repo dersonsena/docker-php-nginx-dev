@@ -8,7 +8,7 @@ Image composition and versions below:
 - Composer 2.1.3
 - Git 2.32.0-r0
 - Redis PHP Extension 5.3.4
-- MongoDB PHP Extension 2.30.1-r0
+- MongoDB PHP Extension 1.10.0alpha1
 
 ## CLI
 ```bash
