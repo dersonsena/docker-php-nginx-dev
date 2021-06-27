@@ -4,8 +4,10 @@ phpIniFile="/usr/local/etc/php/php.ini"
 nginxIniFile="/etc/nginx/conf.d/default.conf"
 xdebugIniFile="/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini"
 
+# Nginx changes
 sed -i "s:root /var/www/html/public;*:root $NGINX_DOCUMENT_ROOT;:g" $nginxIniFile
 
+# PHP configuration changes
 sed -i "s:;date.timezone.*:date.timezone =:g" $phpIniFile
 sed -i "s:date.timezone.*:date.timezone = $PHP_DATE_TIMEZONE:g" $phpIniFile
 sed -i "s:memory_limit.*:memory_limit = $PHP_MEMORY_LIMIT:g" $phpIniFile
@@ -14,6 +16,7 @@ sed -i "s:max_execution_time.*:max_execution_time = $PHP_MAX_EXECUTION_TIME:g" $
 sed -i "s:post_max_size.*:post_max_size = $PHP_POST_MAX_SIZE:g" $phpIniFile
 sed -i "s:upload_max_filesize.*:upload_max_filesize = $PHP_UPLOAD_MAX_FILESIZE:g" $phpIniFile
 
+# XDebug configuration changes
 echo "xdebug.mode=$XDEBUG_MODE" >> $xdebugIniFile
 echo "xdebug.cli_color=1" >> $xdebugIniFile
 echo "xdebug.start_with_request = $XDEBUG_START_WITH_REQUEST" >> $xdebugIniFile

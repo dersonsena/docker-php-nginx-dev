@@ -32,8 +32,8 @@ ENV XDEBUG_VERSION=3.0.2
 ENV MONGODB_VERSION=1.5.2
 ENV REDIS_VERSION=5.3.4
 ENV COMPOSER_VERSION=2.1.3
-ENV NGINX_VERSION=1.18.0-r15
-ENV GIT_VERSION=2.30.2-r0
+ENV NGINX_VERSION=1.20.1-r3
+ENV GIT_VERSION=2.32.0-r0
 
 RUN apk update --no-cache && apk add \
     libzip-dev \
@@ -70,25 +70,32 @@ RUN apk update --no-cache && apk add \
     pcre-dev \
     yaml-dev \
     libmcrypt-dev \
-    sqlite-dev
+    sqlite-dev \
+    freetds-dev \
+    jpeg-dev \
+    openldap-dev \
+    libxslt-dev \
+    && rm -rf /var/cache/apk/*
 
 RUN docker-php-ext-install pdo \
     && docker-php-ext-install pdo_mysql \
     && docker-php-ext-install pgsql pdo_pgsql \
     && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     && docker-php-ext-install mysqli \
-    && docker-php-ext-install json \
-    && docker-php-ext-install xml \
     && docker-php-ext-install intl \
     && docker-php-ext-install pcntl \
     && docker-php-ext-install mbstring \
     && docker-php-ext-install sockets \
     && docker-php-ext-install soap \
     && docker-php-ext-install zip \
-    && docker-php-ext-install iconv \
     && docker-php-ext-install bcmath \
     && docker-php-ext-install curl \
-    && docker-php-ext-install pdo_sqlite
+    && docker-php-ext-install exif \
+    && docker-php-ext-install calendar \
+    && docker-php-ext-install ldap \
+    && docker-php-ext-install pdo_dblib \
+    && docker-php-ext-install xsl \
+    && php -m
 
 # Installing GD extension
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -117,7 +124,7 @@ RUN cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
     
 RUN rm -rf /var/cache/apk/*
  
-RUN curl -sS https://getcomposer.org/installer | php -- --version=${COMPOSER_VERSION} --install-dir=/usr/bin --filename=composer
+RUN curl -fsSL https://getcomposer.org/installer | php -- --version=${COMPOSER_VERSION} --install-dir=/usr/bin --filename=composer
 
 ## Setup of Nginx
 RUN rm -f /etc/nginx/nginx.conf /etc/nginx/conf.d/default.conf

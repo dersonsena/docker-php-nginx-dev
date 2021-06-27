@@ -4,9 +4,9 @@ Image composition and versions below:
 
 - PHP FPM 7.4
 - XDebug 3.0.2
-- NGINX 1.18.0-r15
+- NGINX 1.20.1-r3
 - Composer 2.1.3
-- Git 2.30.1-r0
+- Git 2.32.0-r0
 - Redis PHP Extension 5.3.4
 - MongoDB PHP Extension 2.30.1-r0
 
@@ -42,7 +42,7 @@ networks:
 
 ### PHP
 
-You can custumize some php ini params. The posibles variables and their default values are shown below:
+You can customize some php ini params. The possibles variables and their default values are shown below:
 
 ```yaml
 version: '3.5'
@@ -92,6 +92,72 @@ build:
 ...
 ```
 
+#### Installed PHP Extensions
+
+```bash
+$ php -m
+
+[PHP Modules]
+bcmath
+calendar
+Core
+ctype
+curl
+date
+dom
+exif
+fileinfo
+filter
+ftp
+gd
+hash
+iconv
+imagick
+intl
+json
+ldap
+libxml
+mbstring
+mcrypt
+mongodb
+mysqli
+mysqlnd
+openssl
+pcntl
+pcre
+PDO
+pdo_dblib
+pdo_mysql
+pdo_pgsql
+pdo_sqlite
+pgsql
+Phar
+posix
+readline
+redis
+Reflection
+session
+SimpleXML
+soap
+sockets
+sodium
+SPL
+sqlite3
+standard
+tokenizer
+xdebug
+xml
+xmlreader
+xmlwriter
+xsl
+yaml
+zip
+zlib
+
+[Zend Modules]
+Xdebug
+```
+
 ### XDebug
 
 You can customize some xdebug params. The possibles variables and their default values are shown below:
@@ -132,6 +198,15 @@ environment:
   - XDEBUG_START_WITH_REQUEST=yes
   - XDEBUG_DISCOVER_CLIENT_HOST=false
   - XDEBUG_CLIENT_PORT=<your-ide-port-here>
+...
+```
+
+**TIP:** if you are using PHPUnit + XDebug to generate coverage, remove the `debug` value and add `coverage` in the `XDEBUG_MODE` env:
+
+```yaml
+...
+environment:
+  - XDEBUG_MODE=develop,coverage
 ...
 ```
 
