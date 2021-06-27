@@ -210,6 +210,12 @@ environment:
 ...
 ```
 
+or you can use the follow command in CLI:
+
+```bash
+docker exec -it -e XDEBUG_MODE=coverage "your-container-name" ./vendor/bin/phpunit
+```
+
 ### NGINX
 
 #### Change Document Root
