@@ -35,7 +35,8 @@ ENV COMPOSER_VERSION=2.1.3
 ENV NGINX_VERSION=1.20.1-r3
 ENV GIT_VERSION=2.32.0-r0
 
-RUN apk update --no-cache && apk add \
+RUN apk update && apk add --no-cache --update \
+    $PHPIZE_DEPS \
     libzip-dev \
     git=${GIT_VERSION} \
     nano \
@@ -74,8 +75,7 @@ RUN apk update --no-cache && apk add \
     freetds-dev \
     jpeg-dev \
     openldap-dev \
-    libxslt-dev \
-    && rm -rf /var/cache/apk/*
+    libxslt-dev
 
 RUN docker-php-ext-install pdo \
     && docker-php-ext-install pdo_mysql \
@@ -146,5 +146,7 @@ RUN chown -R www-data:www-data /var/lib/nginx
 
 COPY entrypoint.sh /etc/entrypoint.sh
 RUN chmod +x /etc/entrypoint.sh
+
+RUN apk del $PHPIZE_DEPS && rm -rf /var/cache/apk/*
 
 ENTRYPOINT ["/etc/entrypoint.sh"]
