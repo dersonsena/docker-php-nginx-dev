@@ -102,7 +102,7 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd
 
 # Installing Imagemagick
-RUN pecl install -o -f imagick && docker-php-ext-enable imagick
+RUN pecl install imagick && docker-php-ext-enable imagick
 
 # Installing YAML
 RUN pecl install -o -f yaml && docker-php-ext-enable yaml
