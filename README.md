@@ -174,11 +174,11 @@ services:
       - '80:80'
       - '443:443'
     environment:
-      - XDEBUG_MODE=develop,debug,coverage
+      - XDEBUG_MODE=develop,debug
       - XDEBUG_START_WITH_REQUEST=yes
-      - XDEBUG_DISCOVER_CLIENT_HOST=true
+      - XDEBUG_DISCOVER_CLIENT_HOST=0
       - XDEBUG_CLIENT_HOST=host.docker.internal
-      - XDEBUG_CLIENT_PORT=9000
+      - XDEBUG_CLIENT_PORT=9003
       - XDEBUG_MAX_NESTING_LEVEL=1500
       - XDEBUG_IDE_KEY=PHPSTORM
       - XDEBUG_LOG=/tmp/xdebug.log
@@ -196,10 +196,22 @@ Just on **MacOs environment**, use this configurations to use xdebug:
 ...
 environment:
   - XDEBUG_START_WITH_REQUEST=yes
-  - XDEBUG_DISCOVER_CLIENT_HOST=false
+  - XDEBUG_DISCOVER_CLIENT_HOST=0
   - XDEBUG_CLIENT_PORT=<your-ide-port-here>
 ...
 ```
+
+Just on **Linux environment**, add the `extra_hosts` in your app service as below:
+
+```yaml
+...
+app:
+  image: dersonsena/php-nginx-dev:7.4
+  ...
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+```
+
 
 **TIP:** if you are using PHPUnit + XDebug to generate coverage, remove the `debug` value and add `coverage` in the `XDEBUG_MODE` env:
 
