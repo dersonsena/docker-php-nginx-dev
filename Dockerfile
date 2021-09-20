@@ -47,7 +47,6 @@ RUN apk update && apk add --no-cache --update \
     postgresql-dev \
     libxml2 \
     libxml2-dev \
-    imagemagick \
     graphicsmagick \
     zip \
     unzip \
@@ -61,8 +60,9 @@ RUN apk update && apk add --no-cache --update \
     libjpeg-turbo-dev \
     libpng-dev \
     nginx=${NGINX_VERSION} \
-    imagemagick-dev \
     imagemagick \
+    imagemagick-libs \
+    imagemagick-dev \
     file \
     shadow \
     autoconf \
@@ -102,7 +102,10 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd
 
 # Installing Imagemagick
-RUN pecl install imagick && docker-php-ext-enable imagick
+RUN mkdir -p /usr/src/php/ext/imagick; \
+    curl -fsSL https://github.com/Imagick/imagick/archive/06116aa24b76edaf6b1693198f79e6c295eda8a9.tar.gz | tar xvz -C "/usr/src/php/ext/imagick" --strip 1; \
+    docker-php-ext-install imagick; \
+    docker-php-ext-enable imagick;
 
 # Installing YAML
 RUN pecl install -o -f yaml && docker-php-ext-enable yaml
