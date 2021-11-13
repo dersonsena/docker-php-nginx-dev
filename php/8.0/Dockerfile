@@ -142,10 +142,10 @@ RUN rm -rf /var/cache/apk/*
  
 RUN curl -fsSL https://getcomposer.org/installer | php -- --version=${COMPOSER_VERSION} --install-dir=/usr/local/bin --filename=composer
 
-COPY entrypoint.sh /etc/entrypoint.sh
-RUN chmod +x /etc/entrypoint.sh
+COPY entrypoint.sh /etc/entrypoint-php80.sh
+RUN chmod +x /etc/entrypoint-php80.sh
 RUN apk del $PHPIZE_DEPS && rm -rf /var/cache/apk/*
 
 WORKDIR /
 EXPOSE 9000
-ENTRYPOINT ["/etc/entrypoint.sh"]
+ENTRYPOINT ["/etc/entrypoint-php80.sh"]

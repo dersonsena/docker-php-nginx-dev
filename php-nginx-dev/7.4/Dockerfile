@@ -27,5 +27,6 @@ RUN chown -R nginx:nginx /var/www/html
 COPY ./nginx/entrypoint.sh /etc/entrypoint.sh
 RUN chmod +x /etc/entrypoint.sh
 RUN rm -rf /var/cache/apk/*
+RUN sh /etc/entrypoint-php74.sh
 
 ENTRYPOINT ["/etc/entrypoint.sh"]
