@@ -1,0 +1,31 @@
+FROM dersonsena/php:8.0
+LABEL maintainer=dersonsena@gmail.com \
+      vendor=Cabra.dev
+
+# Nginx Env Variables
+ENV NGINX_DOCUMENT_ROOT=/var/www/html/public
+
+RUN apk update && apk add --no-cache --update nginx
+
+RUN rm -rf /var/cache/apk/*
+
+# Copying config file into image
+RUN rm -f /etc/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./nginx/nginx.conf /etc/nginx/
+COPY ./nginx/default.conf /etc/nginx/conf.d/
+
+# Copying certificates into image
+RUN mkdir -p /etc/nginx/certs
+COPY ./nginx/certs/certificate.crt /etc/nginx/certs/
+COPY ./nginx/certs/certificate.key /etc/nginx/certs/
+
+EXPOSE 80 443
+
+WORKDIR /var/www/html
+RUN chown -R nginx:nginx /var/www/html
+
+COPY ./nginx/entrypoint.sh /etc/entrypoint.sh
+RUN chmod +x /etc/entrypoint.sh
+RUN rm -rf /var/cache/apk/*
+
+ENTRYPOINT ["/etc/entrypoint.sh"]

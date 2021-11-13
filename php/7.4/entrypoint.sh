@@ -1,11 +1,7 @@
 #!/usr/bin/env bash
 
 phpIniFile="/usr/local/etc/php/php.ini"
-nginxIniFile="/etc/nginx/conf.d/default.conf"
 xdebugIniFile="/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini"
-
-# Nginx changes
-sed -i "s:root /var/www/html/public;*:root $NGINX_DOCUMENT_ROOT;:g" $nginxIniFile
 
 # PHP configuration changes
 sed -i "s:;date.timezone.*:date.timezone =:g" $phpIniFile
@@ -27,5 +23,4 @@ echo "xdebug.idekey = $XDEBUG_IDE_KEY" >> $xdebugIniFile
 echo "xdebug.max_nesting_level = $XDEBUG_MAX_NESTING_LEVEL" >> $xdebugIniFile
 echo "xdebug.log=$XDEBUG_LOG" >> $xdebugIniFile
 
-php-fpm -D -R;
-nginx -g "daemon off;"
+php-fpm -D

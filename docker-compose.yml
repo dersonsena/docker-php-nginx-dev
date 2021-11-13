@@ -1,10 +1,24 @@
 version: '3.5'
 services:
-  app:
+  app-74:
+    container_name: dersonsena-php-app
+    image: dersonsena/php-nginx-dev:7.4
+    ports:
+      - "8080:80"
+      - "4431:443"
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - dersonsena-network
+    environment:
+      - NGINX_DOCUMENT_ROOT=/var/www/html/webroot
+
+  app-80:
     container_name: dersonsena-app
-    image: dersonsena/php-nginx-dev
-    build:
-      context: './'
+    image: dersonsena/php-nginx-dev:8.0
+    ports:
+      - "8081:80"
+      - "4432:443"
     volumes:
       - ./:/var/www/html
     networks:

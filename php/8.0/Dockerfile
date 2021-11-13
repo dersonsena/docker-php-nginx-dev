@@ -1,6 +1,6 @@
-ARG PHP_VERSION=7.4.20
-FROM php:${PHP_VERSION}-fpm-alpine
-LABEL maintainer="Kilderson Sena <dersonsena@gmail.com>"
+FROM php:8.0-fpm-alpine
+LABEL maintainer=dersonsena@gmail.com \
+      vendor=Cabra.dev
 
 ENV TERM="xterm"
 ENV LANG="C.UTF-8"
@@ -13,9 +13,6 @@ ENV PHP_MEMORY_LIMIT=256M
 ENV PHP_MAX_EXECUTION_TIME=60
 ENV PHP_POST_MAX_SIZE=50M
 ENV PHP_UPLOAD_MAX_FILESIZE=50M
-
-# Nginx Env Variables
-ENV NGINX_DOCUMENT_ROOT=/var/www/html/public
 
 # XDebug Env Variables
 ENV XDEBUG_MODE=develop,debug
@@ -32,7 +29,6 @@ ENV XDEBUG_VERSION=3.0.2
 ENV MONGODB_VERSION=1.10.0alpha1
 ENV REDIS_VERSION=5.3.4
 ENV COMPOSER_VERSION=2.1.3
-ENV NGINX_VERSION=1.20.1-r3
 ENV GIT_VERSION=2.32.0-r0
 
 RUN apk update && apk add --no-cache --update \
@@ -40,6 +36,7 @@ RUN apk update && apk add --no-cache --update \
     libzip-dev \
     git=${GIT_VERSION} \
     nano \
+    vim \
     g++ \
     gcc \
     curl \
@@ -59,7 +56,6 @@ RUN apk update && apk add --no-cache --update \
     freetype-dev \
     libjpeg-turbo-dev \
     libpng-dev \
-    nginx=${NGINX_VERSION} \
     imagemagick \
     imagemagick-libs \
     imagemagick-dev \
@@ -75,7 +71,8 @@ RUN apk update && apk add --no-cache --update \
     freetds-dev \
     jpeg-dev \
     openldap-dev \
-    libxslt-dev
+    libxslt-dev \
+    rabbitmq-c-dev
 
 RUN docker-php-ext-install pdo \
     && docker-php-ext-install pdo_mysql \
@@ -95,6 +92,10 @@ RUN docker-php-ext-install pdo \
     && docker-php-ext-install ldap \
     && docker-php-ext-install pdo_dblib \
     && docker-php-ext-install xsl \
+    && docker-php-ext-install opcache \
+    && docker-php-ext-install tokenizer \
+    && docker-php-ext-install iconv \
+    && docker-php-ext-install exif \
     && php -m
 
 # Installing GD extension
@@ -102,10 +103,10 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd
 
 # Installing Imagemagick
-RUN mkdir -p /usr/src/php/ext/imagick; \
-    curl -fsSL https://github.com/Imagick/imagick/archive/06116aa24b76edaf6b1693198f79e6c295eda8a9.tar.gz | tar xvz -C "/usr/src/php/ext/imagick" --strip 1; \
-    docker-php-ext-install imagick; \
-    docker-php-ext-enable imagick;
+RUN printf "\n" | pecl install imagick && docker-php-ext-enable --ini-name 20-imagick.ini imagick
+
+# Installing PCOV
+RUN printf "\n" | pecl install pcov && docker-php-ext-enable pcov
 
 # Installing YAML
 RUN pecl install -o -f yaml && docker-php-ext-enable yaml
@@ -124,32 +125,26 @@ RUN pecl install -o -f redis-${REDIS_VERSION} && docker-php-ext-enable redis
 # Installing XDebug
 RUN pecl install -o -f xdebug-${XDEBUG_VERSION} && docker-php-ext-enable xdebug
 
+# Installing AMQP
+RUN docker-php-source extract \
+    && apk -Uu add git rabbitmq-c-dev \
+    && git clone --branch master --depth 1 https://github.com/php-amqp/php-amqp.git /usr/src/php/ext/amqp \
+    && cd /usr/src/php/ext/amqp \
+    && git submodule update --init \
+    && docker-php-ext-install amqp \
+    && docker-php-ext-enable amqp
+
 # Making copy of php.ini development file
 RUN cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
     
 RUN rm -rf /var/cache/apk/*
  
-RUN curl -fsSL https://getcomposer.org/installer | php -- --version=${COMPOSER_VERSION} --install-dir=/usr/bin --filename=composer
-
-## Setup of Nginx
-RUN rm -f /etc/nginx/nginx.conf /etc/nginx/conf.d/default.conf
-COPY ./nginx/nginx.conf /etc/nginx/
-COPY ./nginx/default.conf /etc/nginx/conf.d/
-
-# Copying certificates into container
-RUN mkdir -p /etc/nginx/certs
-COPY ./nginx/certs/certificate.crt /etc/nginx/certs/
-COPY ./nginx/certs/certificate.key /etc/nginx/certs/
-
-EXPOSE 80 443
-
-WORKDIR /var/www/html
-RUN chown -R www-data:www-data /var/www/html
-RUN chown -R www-data:www-data /var/lib/nginx
+RUN curl -fsSL https://getcomposer.org/installer | php -- --version=${COMPOSER_VERSION} --install-dir=/usr/local/bin --filename=composer
 
 COPY entrypoint.sh /etc/entrypoint.sh
 RUN chmod +x /etc/entrypoint.sh
-
 RUN apk del $PHPIZE_DEPS && rm -rf /var/cache/apk/*
 
+WORKDIR /
+EXPOSE 9000
 ENTRYPOINT ["/etc/entrypoint.sh"]
