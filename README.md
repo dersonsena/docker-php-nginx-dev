@@ -2,7 +2,7 @@
 
 Image composition and versions below:
 
-- PHP FPM 7.4
+- PHP FPM 7.4 or 8.0
 - XDebug 3.0.2
 - NGINX 1.20.1-r3
 - Composer 2.1.3
@@ -12,7 +12,7 @@ Image composition and versions below:
 
 ## CLI
 ```bash
-docker run -d --name project-app -v "$PWD":/var/www/html -p 80:80 -p 443:443 dersonsena/php-nginx-dev
+docker run -d --name project-app -v "$PWD":/var/www/html -p 80:80 -p 443:443 dersonsena/php-nginx-dev:8.0
 ```
 
 ## Docker Compose
@@ -26,7 +26,7 @@ version: '3.5'
 services:
   app:
     container_name: project-app
-    image: dersonsena/php-nginx-dev
+    image: dersonsena/php-nginx-dev:8.0
     volumes:
       - ./:/var/www/html
     ports:
@@ -49,7 +49,7 @@ version: '3.5'
 services:
   app:
     container_name: project-app
-    image: dersonsena/php-nginx-dev
+    image: dersonsena/php-nginx-dev:8.0
     volumes:
       - ./:/var/www/html
     ports:
@@ -82,22 +82,13 @@ volumes:
 
 > **TIP**: to make your life easier you can use the original php.ini file placed in root level of this repository.
 
-(BETA) You can change the PHP version (see [PHP Supported Versions](https://www.php.net/supported-versions.php)). Just set the arg `PHP_VERSION`. The default version is `7.4.20`:
-
-```yml
-...
-build:
-  args:
-    PHP_VERSION: 8.0.7
-...
-```
-
 #### Installed PHP Extensions
 
 ```bash
 $ php -m
 
 [PHP Modules]
+amqp
 bcmath
 calendar
 Core
@@ -112,7 +103,6 @@ ftp
 gd
 hash
 iconv
-imagick
 intl
 json
 ldap
@@ -124,6 +114,7 @@ mysqli
 mysqlnd
 openssl
 pcntl
+pcov
 pcre
 PDO
 pdo_dblib
@@ -151,11 +142,13 @@ xmlreader
 xmlwriter
 xsl
 yaml
+Zend OPcache
 zip
 zlib
 
 [Zend Modules]
 Xdebug
+Zend OPcache
 ```
 
 ### XDebug
@@ -167,7 +160,7 @@ version: '3.5'
 services:
   app:
     container_name: project-app
-    image: dersonsena/php-nginx-dev
+    image: dersonsena/php-nginx-dev:8.0
     volumes:
       - ./:/var/www/html
     ports:
@@ -206,7 +199,7 @@ Just on **Linux environment**, add the `extra_hosts` in your app service as belo
 ```yaml
 ...
 app:
-  image: dersonsena/php-nginx-dev:7.4
+  image: dersonsena/php-nginx-dev:8.0
   ...
   extra_hosts:
     - "host.docker.internal:host-gateway"
@@ -255,7 +248,7 @@ version: '3.5'
 services:
   app:
     container_name: project-app
-    image: dersonsena/php-nginx-dev
+    image: dersonsena/php-nginx-dev:8.0
     volumes:
       - ./:/var/www/html
       - ./.docker/nginx/certs:/etc/nginx/certs
