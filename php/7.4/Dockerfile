@@ -31,39 +31,47 @@ ENV REDIS_VERSION=5.3.4
 ENV COMPOSER_VERSION=2.1.3
 ENV GIT_VERSION=2.32.0-r0
 
-RUN apk update && apk add --no-cache --update \
+RUN apk --no-cache update \
+    && apk --no-cache upgrade \
+    && apk add --no-cache --virtual .deps \
+        $PHPIZE_DEPS \
+        git=${GIT_VERSION} \
+        nano \
+        vim \
+        g++ \
+        gcc \
+        curl \
+        libxml2 \
+        zip \
+        unzip \
+        wget \
+        moreutils \
+        tzdata \
+        freetype \
+        graphicsmagick \
+        imagemagick \
+        imagemagick-libs \
+        file \
+        shadow \
+        autoconf \
+        make \
+        libtool \
+        icu-libs \
+        zlib \
+        libgomp
+
+RUN apk add --no-cache --virtual .build-deps \
     $PHPIZE_DEPS \
+    icu-dev \
+    zlib-dev \
     libzip-dev \
-    git=${GIT_VERSION} \
-    nano \
-    vim \
-    g++ \
-    gcc \
-    curl \
     curl-dev \
     postgresql-dev \
-    libxml2 \
     libxml2-dev \
-    graphicsmagick \
-    zip \
-    unzip \
-    wget \
-    moreutils \
-    icu-dev \
     oniguruma-dev \
-    tzdata \
-    freetype \
-    freetype-dev \
     libjpeg-turbo-dev \
     libpng-dev \
-    imagemagick \
-    imagemagick-libs \
-    imagemagick-dev \
-    file \
-    shadow \
-    autoconf \
-    make \
-    libtool \
+    freetype-dev \freetype-dev \
     pcre-dev \
     yaml-dev \
     libmcrypt-dev \
@@ -72,7 +80,8 @@ RUN apk update && apk add --no-cache --update \
     jpeg-dev \
     openldap-dev \
     libxslt-dev \
-    rabbitmq-c-dev
+    rabbitmq-c-dev \
+    imagemagick-dev
 
 RUN docker-php-ext-install pdo \
     && docker-php-ext-install pdo_mysql \
@@ -95,7 +104,6 @@ RUN docker-php-ext-install pdo \
     && docker-php-ext-install opcache \
     && docker-php-ext-install tokenizer \
     && docker-php-ext-install iconv \
-    && docker-php-ext-install exif \
     && php -m
 
 # Installing GD extension
@@ -103,10 +111,10 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd
 
 # Installing Imagemagick
-RUN printf "\n" | pecl install imagick && docker-php-ext-enable --ini-name 20-imagick.ini imagick
+RUN pecl install imagick && docker-php-ext-enable --ini-name 20-imagick.ini imagick
 
 # Installing PCOV
-RUN printf "\n" | pecl install pcov && docker-php-ext-enable pcov
+RUN pecl install pcov && docker-php-ext-enable pcov
 
 # Installing YAML
 RUN pecl install -o -f yaml && docker-php-ext-enable yaml
@@ -130,14 +138,13 @@ RUN pecl install -o -f amqp && docker-php-ext-enable amqp
 
 # Making copy of php.ini development file
 RUN cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
-    
-RUN rm -rf /var/cache/apk/*
  
 RUN curl -fsSL https://getcomposer.org/installer | php -- --version=${COMPOSER_VERSION} --install-dir=/usr/local/bin --filename=composer
 
 COPY entrypoint.sh /etc/entrypoint.sh
 RUN chmod +x /etc/entrypoint.sh
-RUN apk del $PHPIZE_DEPS && rm -rf /var/cache/apk/*
+RUN apk del $PHPIZE_DEPS
+RUN rm -rf /var/cache/apk/*
 
 WORKDIR /
 EXPOSE 9000

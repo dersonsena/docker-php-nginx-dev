@@ -72,7 +72,8 @@ RUN apk update && apk add --no-cache --update \
     jpeg-dev \
     openldap-dev \
     libxslt-dev \
-    rabbitmq-c-dev
+    rabbitmq-c-dev \
+    libgomp
 
 RUN docker-php-ext-install pdo \
     && docker-php-ext-install pdo_mysql \
@@ -103,10 +104,10 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd
 
 # Installing Imagemagick
-RUN printf "\n" | pecl install imagick && docker-php-ext-enable --ini-name 20-imagick.ini imagick
+RUN pecl install imagick && docker-php-ext-enable --ini-name 20-imagick.ini imagick
 
 # Installing PCOV
-RUN printf "\n" | pecl install pcov && docker-php-ext-enable pcov
+RUN pecl install pcov && docker-php-ext-enable pcov
 
 # Installing YAML
 RUN pecl install -o -f yaml && docker-php-ext-enable yaml

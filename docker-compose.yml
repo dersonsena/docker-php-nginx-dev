@@ -1,7 +1,7 @@
 version: '3.5'
 services:
   app-74:
-    container_name: dersonsena-php-app
+    container_name: dersonsena-php7
     image: dersonsena/php-nginx-dev:7.4
     ports:
       - "8080:80"
@@ -14,7 +14,7 @@ services:
       - NGINX_DOCUMENT_ROOT=/var/www/html/webroot
 
   app-80:
-    container_name: dersonsena-app
+    container_name: dersonsena-php8
     image: dersonsena/php-nginx-dev:8.0
     ports:
       - "8081:80"
