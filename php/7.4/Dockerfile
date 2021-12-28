@@ -15,53 +15,48 @@ ENV PHP_POST_MAX_SIZE=50M
 ENV PHP_UPLOAD_MAX_FILESIZE=50M
 
 # XDebug Env Variables
-ENV XDEBUG_MODE=develop,debug
+ENV XDEBUG_MODE=debug
 ENV XDEBUG_START_WITH_REQUEST=yes
-ENV XDEBUG_DISCOVER_CLIENT_HOST=0
+ENV XDEBUG_DISCOVER_CLIENT_HOST=1
 ENV XDEBUG_CLIENT_HOST=host.docker.internal
 ENV XDEBUG_CLIENT_PORT=9003
 ENV XDEBUG_MAX_NESTING_LEVEL=1500
 ENV XDEBUG_IDE_KEY=PHPSTORM
 ENV XDEBUG_LOG=/tmp/xdebug.log
+ENV PHP_IDE_CONFIG="serverName=_"
 
 # Versioning Env Vars
 ENV XDEBUG_VERSION=3.0.2
 ENV MONGODB_VERSION=1.10.0alpha1
 ENV REDIS_VERSION=5.3.4
 ENV COMPOSER_VERSION=2.1.3
-ENV GIT_VERSION=2.32.0-r0
+ENV GIT_VERSION=2.34.1-r0
 
-RUN apk --no-cache update \
-    && apk --no-cache upgrade \
-    && apk add --no-cache --virtual .deps \
-        $PHPIZE_DEPS \
-        git=${GIT_VERSION} \
-        nano \
-        vim \
-        g++ \
-        gcc \
-        curl \
-        libxml2 \
-        zip \
-        unzip \
-        wget \
-        moreutils \
-        tzdata \
-        freetype \
-        graphicsmagick \
-        imagemagick \
-        imagemagick-libs \
-        file \
-        shadow \
-        autoconf \
-        make \
-        libtool \
-        icu-libs \
-        zlib \
-        libgomp
-
-RUN apk add --no-cache --virtual .build-deps \
+RUN apk update && apk add --no-cache --update \
     $PHPIZE_DEPS \
+    bash \
+    git=${GIT_VERSION} \
+    nano \
+    vim \
+    g++ \
+    gcc \
+    curl \
+    libxml2 \
+    zip \
+    unzip \
+    wget \
+    moreutils \
+    tzdata \
+    freetype \
+    graphicsmagick \
+    file \
+    shadow \
+    autoconf \
+    make \
+    libtool \
+    icu-libs \
+    zlib \
+    libgomp \
     icu-dev \
     zlib-dev \
     libzip-dev \
@@ -71,7 +66,7 @@ RUN apk add --no-cache --virtual .build-deps \
     oniguruma-dev \
     libjpeg-turbo-dev \
     libpng-dev \
-    freetype-dev \freetype-dev \
+    freetype-dev \
     pcre-dev \
     yaml-dev \
     libmcrypt-dev \
@@ -80,8 +75,7 @@ RUN apk add --no-cache --virtual .build-deps \
     jpeg-dev \
     openldap-dev \
     libxslt-dev \
-    rabbitmq-c-dev \
-    imagemagick-dev
+    rabbitmq-c-dev
 
 RUN docker-php-ext-install pdo \
     && docker-php-ext-install pdo_mysql \
@@ -104,14 +98,20 @@ RUN docker-php-ext-install pdo \
     && docker-php-ext-install opcache \
     && docker-php-ext-install tokenizer \
     && docker-php-ext-install iconv \
-    && php -m
+    && docker-php-ext-install exif
 
 # Installing GD extension
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd
 
 # Installing Imagemagick
-RUN pecl install imagick && docker-php-ext-enable --ini-name 20-imagick.ini imagick
+RUN set -ex \
+    && apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS imagemagick-dev libtool \
+    && export CFLAGS="$PHP_CFLAGS" CPPFLAGS="$PHP_CPPFLAGS" LDFLAGS="$PHP_LDFLAGS" \
+    && pecl install imagick \
+    && docker-php-ext-enable --ini-name 20-imagick.ini imagick \
+    && apk add --no-cache --virtual .imagick-runtime-deps imagemagick \
+    && apk del .phpize-deps
 
 # Installing PCOV
 RUN pecl install pcov && docker-php-ext-enable pcov
@@ -136,16 +136,20 @@ RUN pecl install -o -f xdebug-${XDEBUG_VERSION} && docker-php-ext-enable xdebug
 # Installing AMQP
 RUN pecl install -o -f amqp && docker-php-ext-enable amqp
 
+RUN php -m
+
+RUN apk del $PHPIZE_DEPS
+RUN rm -rf /var/cache/apk/*
+
 # Making copy of php.ini development file
 RUN cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
  
 RUN curl -fsSL https://getcomposer.org/installer | php -- --version=${COMPOSER_VERSION} --install-dir=/usr/local/bin --filename=composer
 
-COPY entrypoint.sh /etc/entrypoint-php74.sh
-RUN chmod +x /etc/entrypoint-php74.sh
-RUN apk del $PHPIZE_DEPS
-RUN rm -rf /var/cache/apk/*
+COPY entrypoint.sh /etc/entrypoint.sh
+RUN chmod +x /etc/entrypoint.sh
+RUN sh /etc/entrypoint.sh
 
 WORKDIR /
 EXPOSE 9000
-ENTRYPOINT ["/etc/entrypoint-php74.sh"]
+ENTRYPOINT ["/etc/entrypoint.sh"]
